@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "critique.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["issues"],
+  "properties": {
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["category", "requirement_ids", "candidate_ids", "issue", "suggestion"],
+        "properties": {
+          "category": {
+            "enum": [
+              "coverage",
+              "unambiguity",
+              "independence",
+              "executability",
+              "extra_assumption",
+              "other"
+            ]
+          },
+          "requirement_ids": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {"type": "string", "minLength": 1}
+          },
+          "candidate_ids": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {"type": "string", "minLength": 1}
+          },
+          "issue": {"type": "string", "minLength": 1},
+          "suggestion": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

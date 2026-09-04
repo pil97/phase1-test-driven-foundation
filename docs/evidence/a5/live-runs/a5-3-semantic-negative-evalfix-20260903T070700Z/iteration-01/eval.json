@@ -1,0 +1,18 @@
+{
+  "coverage": {
+    "rationale": "R1-R3 are represented adequately, but the mandatory R4 boundary (now == expiresAt) is covered by GH-R4-WRONG and UT-R4-WRONG with an expected outcome that directly inverts the fixture's stated semantics: R4 says now==expiresAt must be treated as expired and re-HOLD must be allowed, while both candidates assert the existing HOLD is 'still active' and reject the re-HOLD request. This is not an incomplete boundary but a materially incorrect interpretation of a core requirement, so the required_boundaries condition for R4 is effectively unmet despite being nominally present.",
+    "score": 1
+  },
+  "executability": {
+    "rationale": "Setup/given, action/when, and expected/then fields are concrete and map cleanly onto JUnit given-when-then or Gherkin steps without needing new business rules invented (seat state, now/expiresAt comparison, and pass/fail outcome are all explicit). Score is not a 5 because R3/UT-R3 omit an explicit numeric or comparative boundary for 'expired', requiring a small interpretive step to encode the exact time relation in an executable test.",
+    "score": 4
+  },
+  "independence": {
+    "rationale": "Each unit test and each Gherkin scenario defines its own Given/setup (seat state, now vs expiresAt relation) independently, with no reference to other candidates, shared mutable fixtures, or required execution order. All eight candidates can be run in isolation and in any order without cross-dependency.",
+    "score": 5
+  },
+  "unambiguity": {
+    "rationale": "Most candidates state precondition, action, and expected result in objectively decidable terms (e.g. 'now < expiresAt' -> reject, 'now == expiresAt' -> reject-per-candidate). The R4 candidates are internally unambiguous (clear condition, clear expected outcome) even though that outcome is wrong per the fixture — decidability and correctness are separate concerns. Minor deduction because R3/UT-R3 rely on the phrase '기존 HOLD가 만료되었다' without an explicit now/expiresAt relation, leaving the exact boundary value used for 'expired' open to interpretation.",
+    "score": 4
+  }
+}

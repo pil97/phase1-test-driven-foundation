@@ -1,0 +1,34 @@
+{
+  "issues": [
+    {
+      "category": "executability",
+      "requirement_ids": ["R4"],
+      "candidate_ids": [
+        "unit-r4-rehold-at-exact-expiry-boundary-allowed",
+        "gherkin-r4-rehold-allowed-at-exact-expiry"
+      ],
+      "issue": "Both the unit and gherkin R4 candidates rely on setting up 'now == expiresAt' purely as a symbolic condition, with no mechanism described for reliably producing exact equality between a continuously advancing 'now' and a stored expiresAt value. Unlike R2/R3 (strict inequality, which any arbitrary offset satisfies), the exact-equality boundary in R4 cannot be reproduced deterministically without some explicit time-control approach (e.g., a fixed/injected clock or an expiresAt value derived from the same clock read used as 'now').",
+      "suggestion": "Add a setup detail clarifying that 'now' is deterministically fixed to equal the seat's stored expiresAt (e.g., via a controlled/injected clock or by deriving expiresAt from the same 'now' value used in the assertion), so the boundary condition is actually reproducible in an executable test."
+    },
+    {
+      "category": "unambiguity",
+      "requirement_ids": ["R4"],
+      "candidate_ids": [
+        "unit-r4-rehold-at-exact-expiry-boundary-allowed",
+        "gherkin-r4-rehold-allowed-at-exact-expiry"
+      ],
+      "issue": "Both candidates list 'existing HOLD is treated as expired' / '기존 HOLD가 만료된 것으로 판단된다' as a separate, independently verifiable expected/then item alongside 're-HOLD request succeeds' and 'seat state becomes HELD'. The fixture does not define any observable artifact (status field, response code, log, event) that would let a test distinguish 'treated as expired' from the final outcome already captured by the success/state-change assertions, so it is unclear what this line item is meant to assert beyond what the other two already cover.",
+      "suggestion": "Either remove the standalone 'treated as expired' assertion as redundant with the final-state assertions, or, if the fixture intends a distinct observable signal for this internal judgment, state what that observable signal is; otherwise keep only the outcome-level assertions (success + resulting HELD state)."
+    },
+    {
+      "category": "extra_assumption",
+      "requirement_ids": ["R2"],
+      "candidate_ids": [
+        "unit-r2-rehold-active-held-seat-rejected",
+        "gherkin-r2-rehold-rejected-while-active"
+      ],
+      "issue": "Both R2 candidates assert that the seat 'remains HELD with original expiresAt' / '기존 HELD 상태와 expiresAt을 유지한다' after the re-HOLD is rejected. R2's text ('now < expiresAt인 HELD 좌석에 재-HOLD를 요청하면 거절한다') only states that the re-HOLD request itself is rejected; it does not explicitly state that the seat's expiresAt value must be verified as byte-for-byte unchanged post-rejection, which is an inference layered on top of the requirement text rather than something the fixture states.",
+      "suggestion": "Either scope the R2 expected outcome to just 'the re-HOLD request is rejected' as literally stated by the requirement, or explicitly note that the expiresAt-preservation check is an inferred consequence of 'reject' (no mutation) rather than a directly stated requirement, so reviewers can trace it back to its actual textual basis."
+    }
+  ]
+}

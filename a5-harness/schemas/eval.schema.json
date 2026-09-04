@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "eval.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["coverage", "unambiguity", "independence", "executability"],
+  "properties": {
+    "coverage": {"$ref": "#/$defs/axis"},
+    "unambiguity": {"$ref": "#/$defs/axis"},
+    "independence": {"$ref": "#/$defs/axis"},
+    "executability": {"$ref": "#/$defs/axis"},
+    "reported_total": {"type": "integer"}
+  },
+  "$defs": {
+    "axis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["score", "rationale"],
+      "properties": {
+        "score": {"type": "integer", "minimum": 1, "maximum": 5},
+        "rationale": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

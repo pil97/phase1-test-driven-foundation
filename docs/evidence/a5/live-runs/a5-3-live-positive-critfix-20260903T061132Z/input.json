@@ -1,0 +1,31 @@
+{
+  "fixture_id": "seat-hold-v0",
+  "required_boundaries": [
+    {
+      "condition": "now == expiresAt",
+      "requirement_id": "R4"
+    }
+  ],
+  "required_candidate_kinds": [
+    "unit",
+    "gherkin"
+  ],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "AVAILABLE 좌석에 HOLD 요청 시 성공한다."
+    },
+    {
+      "id": "R2",
+      "text": "now < expiresAt인 HELD 좌석에 재-HOLD를 요청하면 거절한다."
+    },
+    {
+      "id": "R3",
+      "text": "만료된 HELD 좌석에 재-HOLD를 요청하면 허용한다."
+    },
+    {
+      "id": "R4",
+      "text": "now == expiresAt이면 기존 HOLD를 만료된 것으로 판단하고 재-HOLD를 허용한다."
+    }
+  ]
+}

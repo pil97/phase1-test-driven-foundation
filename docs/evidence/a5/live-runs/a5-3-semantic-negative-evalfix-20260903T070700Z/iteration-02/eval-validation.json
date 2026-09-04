@@ -1,0 +1,23 @@
+{
+  "details": [],
+  "failure_codes": [],
+  "parsed": {
+    "coverage": {
+      "rationale": "All four requirements (R1-R4) are represented in both unit and gherkin candidate sets with matching semantics. R2 correctly requires now < expiresAt to reject re-hold; R3 covers the general expired case; R4 explicitly covers the mandated now == expiresAt boundary with the correct outcome (treated as expired, re-hold allowed), matching the fixture's required_boundaries entry. No extra business assumptions (e.g., new error codes, additional states) are introduced beyond what the requirements state.",
+      "score": 5
+    },
+    "executability": {
+      "rationale": "Each candidate specifies a concrete precondition, a single action, and an expected result tied to a specific requirement and (where relevant) boundary condition, which is enough to draft corresponding JUnit test methods or Gherkin steps without inventing new business rules. It falls short of a 5 because the exact assertion surface (e.g., what 'success'/'rejected' returns or throws, and what the resulting seat/hold state looks like post-action) is left implicit, requiring a small amount of interpretation during implementation.",
+      "score": 4
+    },
+    "independence": {
+      "rationale": "Every candidate (both gherkin and unit) defines its own explicit initial state (seat status plus now/expiresAt relation) in its given/setup section. None reference outcomes or state from other candidates, and there is no shared mutable fixture or ordering dependency implied across UT-R1..UT-R4 or GH-R1..GH-R4.",
+      "score": 5
+    },
+    "unambiguity": {
+      "rationale": "Preconditions (AVAILABLE / HELD with now < / > / == expiresAt) and actions (request HOLD / re-HOLD) are stated in objectively checkable terms, and expected outcomes (success/reject/allow) are clearly stated and consistent with requirement wording. Minor ambiguity remains because 'HOLD 요청이 성공한다' and '거절된다' do not specify the concrete observable contract (e.g., return value, exception type, resulting seat state after the operation), leaving a small interpretive gap for translation into precise assertions.",
+      "score": 4
+    }
+  },
+  "status": "PASS"
+}

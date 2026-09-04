@@ -1,0 +1,47 @@
+schema_version: "0.1"
+rubric_id: "test-quality-v0"
+
+axes:
+  coverage:
+    weight: 1
+    score_min: 1
+    score_max: 5
+    anchors:
+      1: "Multiple core requirements or essential boundary conditions are missing or materially misinterpreted."
+      3: "Main requirements are represented, but a failure or boundary condition is incomplete, unclear, requires interpretation, or an extra business assumption is introduced."
+      5: "All requirements and essential boundaries are represented with correct semantics without adding business contracts not present in the authoritative fixture."
+    intermediate_scores: "Scores 2 and 4 represent intermediate quality between the adjacent defined anchors."
+
+  unambiguity:
+    weight: 1
+    score_min: 1
+    score_max: 5
+    anchors:
+      1: "Preconditions or expected outcomes are not objectively decidable, or vague wording substitutes for assertions."
+      3: "Most conditions and outcomes are decidable, but some setup, boundary, or expected result still requires interpretation."
+      5: "Setup, action, expected result, and relevant boundary conditions are explicit and objectively decidable."
+    intermediate_scores: "Scores 2 and 4 represent intermediate quality between the adjacent defined anchors."
+
+  independence:
+    weight: 1
+    score_min: 1
+    score_max: 5
+    anchors:
+      1: "A candidate depends on another test's prior execution, mutable shared state, or execution order."
+      3: "Candidates are mostly independent, but initialization or reset assumptions remain unclear in some cases."
+      5: "Each candidate defines its own initial state and does not depend on another candidate or execution order."
+    intermediate_scores: "Scores 2 and 4 represent intermediate quality between the adjacent defined anchors."
+
+  executability:
+    weight: 1
+    score_min: 1
+    score_max: 5
+    anchors:
+      1: "The candidate is idea-level prose and requires substantial new requirement inference before becoming a JUnit or Gherkin test."
+      3: "The candidate is implementable, but fixture, time, setup, or assertion details still require some interpretation."
+      5: "The candidate is concrete enough to translate to JUnit or Gherkin without inventing new business requirements."
+    intermediate_scores: "Scores 2 and 4 represent intermediate quality between the adjacent defined anchors."
+
+decision:
+  min_total: 16
+  min_axis: 3

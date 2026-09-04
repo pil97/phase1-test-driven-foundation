@@ -1,0 +1,23 @@
+{
+  "details": [],
+  "failure_codes": [],
+  "parsed": {
+    "coverage": {
+      "rationale": "All four requirements (R1-R4) are represented in both required kinds (unit and gherkin), with matching semantics: R1 success-on-AVAILABLE, R2 reject-while-not-expired, R3 allow-after-expiry, and R4 the required boundary now==expiresAt treated as expired/allowed. No extra business rules (e.g., specific HOLD duration, holder identity, notification behavior) are introduced beyond what the fixture states.",
+      "score": 5
+    },
+    "executability": {
+      "rationale": "Setup/action/expected (unit) and given/when/then (gherkin) are concrete enough to draft JUnit tests and Gherkin steps directly for state transitions and boundary handling without inventing new business rules. Some implementation-level decisions are still needed (e.g., how 'now' is supplied/mocked, and concrete timestamp values for expiresAt) since only relational conditions like 'now == expiresAt' are given rather than fixture literals.",
+      "score": 4
+    },
+    "independence": {
+      "rationale": "Every unit and gherkin candidate specifies its own full initial state (seat status, expiresAt presence, and the now-vs-expiresAt relation) in its setup/given block. None reference outcomes or state left behind by another candidate, so they can run in any order or isolation.",
+      "score": 5
+    },
+    "unambiguity": {
+      "rationale": "Core preconditions (seat state, relation of now to expiresAt) and outcomes (success/reject, resulting state) are stated explicitly and are objectively checkable. However, phrases like 'seat state becomes HELD with new hold' / '좌석 상태가 새로운 HOLD로 HELD가 된다' leave it undecided whether a genuinely new expiresAt value must be produced or merely that the request is accepted, which requires some interpretation to turn into a concrete assertion.",
+      "score": 4
+    }
+  },
+  "status": "PASS"
+}

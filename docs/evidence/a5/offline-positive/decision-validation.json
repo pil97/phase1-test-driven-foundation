@@ -1,0 +1,30 @@
+{
+  "details": [
+    {
+      "code": "EVAL_SCORE_SUMMARY",
+      "computed_total": 18,
+      "reported_total_ignored": null,
+      "rubric_id": "test-quality-v0",
+      "scores": {
+        "coverage": 5,
+        "executability": 4,
+        "independence": 5,
+        "unambiguity": 4
+      },
+      "weighted_scores": {
+        "coverage": 5,
+        "executability": 4,
+        "independence": 5,
+        "unambiguity": 4
+      },
+      "weights": {
+        "coverage": 1,
+        "executability": 1,
+        "independence": 1,
+        "unambiguity": 1
+      }
+    }
+  ],
+  "failure_codes": [],
+  "status": "PASS"
+}

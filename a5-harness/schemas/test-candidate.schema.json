@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "test-candidate.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "candidate_set_id", "unit_tests", "gherkin_scenarios"],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "candidate_set_id": {"type": "string", "minLength": 1},
+    "unit_tests": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/unitCandidate"}
+    },
+    "gherkin_scenarios": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/gherkinCandidate"}
+    }
+  },
+  "$defs": {
+    "boundaryCondition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["condition", "expected"],
+      "properties": {
+        "condition": {"type": "string", "minLength": 1},
+        "expected": {"type": "string", "minLength": 1}
+      }
+    },
+    "unitCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_id",
+        "kind",
+        "requirement_ids",
+        "name",
+        "setup",
+        "action",
+        "expected",
+        "boundary_conditions"
+      ],
+      "properties": {
+        "candidate_id": {"type": "string", "minLength": 1},
+        "kind": {"const": "unit"},
+        "requirement_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "name": {"type": "string", "minLength": 1},
+        "setup": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "action": {"type": "string", "minLength": 1},
+        "expected": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "boundary_conditions": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/boundaryCondition"}
+        }
+      }
+    },
+    "gherkinCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_id",
+        "kind",
+        "requirement_ids",
+        "name",
+        "given",
+        "when",
+        "then",
+        "boundary_conditions"
+      ],
+      "properties": {
+        "candidate_id": {"type": "string", "minLength": 1},
+        "kind": {"const": "gherkin"},
+        "requirement_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "name": {"type": "string", "minLength": 1},
+        "given": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "when": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "then": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "boundary_conditions": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/boundaryCondition"}
+        }
+      }
+    }
+  }
+}

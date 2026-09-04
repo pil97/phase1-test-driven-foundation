@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "requirement-fixture.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "fixture_id",
+    "requirements",
+    "required_candidate_kinds",
+    "required_boundaries"
+  ],
+  "properties": {
+    "fixture_id": {"type": "string", "minLength": 1},
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "text"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "text": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "required_candidate_kinds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"enum": ["unit", "gherkin"]}
+    },
+    "required_boundaries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["requirement_id", "condition"],
+        "properties": {
+          "requirement_id": {"type": "string", "minLength": 1},
+          "condition": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

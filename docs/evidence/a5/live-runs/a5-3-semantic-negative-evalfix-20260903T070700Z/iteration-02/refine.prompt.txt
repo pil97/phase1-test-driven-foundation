@@ -1,0 +1,496 @@
+You are the Refine role in a Requirement → Test Harness.
+
+Produce a complete replacement Test Candidate JSON object that fixes the supplied current candidate using only:
+- the authoritative requirement fixture,
+- the current candidate,
+- the current Critique (if available),
+- the current Eval (if available), and
+- deterministic validation failures (if available).
+
+Rules:
+- Output JSON only. No Markdown fences, commentary, scores, PASS/REJECT, or patch/diff.
+- Return the full replacement candidate, not a partial edit.
+- Do not invent new business requirements, TTL values, exception contracts, states, or implementation details.
+- Preserve requirement traceability, but do not merely add requirement_ids without fixing actual semantics.
+- Fix the underlying issue by rereading the authoritative requirement.
+- The feedback identifies problems; the authoritative requirement remains the source of truth.
+
+AUTHORITATIVE REQUIREMENT FIXTURE:
+{
+  "fixture_id": "seat-hold-v0",
+  "required_boundaries": [
+    {
+      "condition": "now == expiresAt",
+      "requirement_id": "R4"
+    }
+  ],
+  "required_candidate_kinds": [
+    "unit",
+    "gherkin"
+  ],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "AVAILABLE 좌석에 HOLD 요청 시 성공한다."
+    },
+    {
+      "id": "R2",
+      "text": "now < expiresAt인 HELD 좌석에 재-HOLD를 요청하면 거절한다."
+    },
+    {
+      "id": "R3",
+      "text": "만료된 HELD 좌석에 재-HOLD를 요청하면 허용한다."
+    },
+    {
+      "id": "R4",
+      "text": "now == expiresAt이면 기존 HOLD를 만료된 것으로 판단하고 재-HOLD를 허용한다."
+    }
+  ]
+}
+
+CURRENT TEST CANDIDATE:
+{
+  "candidate_set_id": "seat-hold-semantic-wrong-v0",
+  "gherkin_scenarios": [
+    {
+      "boundary_conditions": [],
+      "candidate_id": "GH-R1",
+      "given": [
+        "좌석이 AVAILABLE 상태이다."
+      ],
+      "kind": "gherkin",
+      "name": "AVAILABLE 좌석 HOLD 성공",
+      "requirement_ids": [
+        "R1"
+      ],
+      "then": [
+        "HOLD 요청이 성공한다."
+      ],
+      "when": [
+        "사용자가 해당 좌석에 HOLD를 요청한다."
+      ]
+    },
+    {
+      "boundary_conditions": [
+        {
+          "condition": "now < expiresAt",
+          "expected": "existing HOLD is active"
+        }
+      ],
+      "candidate_id": "GH-R2",
+      "given": [
+        "좌석이 HELD 상태이고 now < expiresAt이다."
+      ],
+      "kind": "gherkin",
+      "name": "유효한 HOLD 재요청 거절",
+      "requirement_ids": [
+        "R2"
+      ],
+      "then": [
+        "재-HOLD 요청이 거절된다."
+      ],
+      "when": [
+        "사용자가 해당 좌석에 다시 HOLD를 요청한다."
+      ]
+    },
+    {
+      "boundary_conditions": [],
+      "candidate_id": "GH-R3",
+      "given": [
+        "좌석이 HELD 상태이고 기존 HOLD가 만료되었다."
+      ],
+      "kind": "gherkin",
+      "name": "만료된 HOLD 재요청 허용",
+      "requirement_ids": [
+        "R3"
+      ],
+      "then": [
+        "재-HOLD가 허용된다."
+      ],
+      "when": [
+        "사용자가 해당 좌석에 다시 HOLD를 요청한다."
+      ]
+    },
+    {
+      "boundary_conditions": [
+        {
+          "condition": "now == expiresAt",
+          "expected": "existing HOLD is still active"
+        }
+      ],
+      "candidate_id": "GH-R4-WRONG",
+      "given": [
+        "좌석이 HELD 상태이고 now == expiresAt이다."
+      ],
+      "kind": "gherkin",
+      "name": "정확한 만료 시각을 active로 취급하는 잘못된 시나리오",
+      "requirement_ids": [
+        "R4"
+      ],
+      "then": [
+        "기존 HOLD는 아직 active이므로 재-HOLD 요청이 거절된다."
+      ],
+      "when": [
+        "사용자가 해당 좌석에 다시 HOLD를 요청한다."
+      ]
+    }
+  ],
+  "schema_version": "0.1",
+  "unit_tests": [
+    {
+      "action": "해당 좌석에 HOLD를 요청한다.",
+      "boundary_conditions": [],
+      "candidate_id": "UT-R1",
+      "expected": [
+        "HOLD 요청이 성공한다."
+      ],
+      "kind": "unit",
+      "name": "available_seat_hold_succeeds",
+      "requirement_ids": [
+        "R1"
+      ],
+      "setup": [
+        "좌석 상태는 AVAILABLE이다."
+      ]
+    },
+    {
+      "action": "해당 좌석에 다시 HOLD를 요청한다.",
+      "boundary_conditions": [
+        {
+          "condition": "now < expiresAt",
+          "expected": "existing HOLD is active"
+        }
+      ],
+      "candidate_id": "UT-R2",
+      "expected": [
+        "재-HOLD 요청이 거절된다."
+      ],
+      "kind": "unit",
+      "name": "active_hold_rehold_is_rejected",
+      "requirement_ids": [
+        "R2"
+      ],
+      "setup": [
+        "좌석 상태는 HELD이고 now < expiresAt이다."
+      ]
+    },
+    {
+      "action": "해당 좌석에 다시 HOLD를 요청한다.",
+      "boundary_conditions": [],
+      "candidate_id": "UT-R3",
+      "expected": [
+        "재-HOLD가 허용된다."
+      ],
+      "kind": "unit",
+      "name": "expired_hold_can_be_reheld",
+      "requirement_ids": [
+        "R3"
+      ],
+      "setup": [
+        "좌석 상태는 HELD이고 기존 HOLD가 만료되었다."
+      ]
+    },
+    {
+      "action": "해당 좌석에 다시 HOLD를 요청한다.",
+      "boundary_conditions": [
+        {
+          "condition": "now == expiresAt",
+          "expected": "existing HOLD is still active"
+        }
+      ],
+      "candidate_id": "UT-R4-WRONG",
+      "expected": [
+        "기존 HOLD는 아직 active이므로 재-HOLD 요청이 거절된다."
+      ],
+      "kind": "unit",
+      "name": "exact_expiration_is_still_active_wrong",
+      "requirement_ids": [
+        "R4"
+      ],
+      "setup": [
+        "좌석 상태는 HELD이고 now == expiresAt이다."
+      ]
+    }
+  ]
+}
+
+CURRENT CRITIQUE (may be null):
+{
+  "issues": [
+    {
+      "candidate_ids": [
+        "GH-R4-WRONG",
+        "UT-R4-WRONG"
+      ],
+      "category": "extra_assumption",
+      "issue": "R4 explicitly states that when now == expiresAt, the existing HOLD must be treated as expired and re-HOLD must be allowed. Both candidates assert the opposite: they treat now == expiresAt as 'still active' and expect the re-HOLD to be rejected. This is not a variant interpretation of an ambiguous requirement — it directly contradicts the stated requirement text, introducing behavior (treating the exact expiry instant as active) that the fixture does not support and in fact explicitly forbids.",
+      "requirement_ids": [
+        "R4"
+      ],
+      "suggestion": "Invert the expected outcome for both the Given/When/Then and setup/action/expected: given a seat HELD with now == expiresAt, the existing HOLD should be judged expired, and the re-HOLD request should succeed. Update boundary_conditions' 'expected' field from 'existing HOLD is still active' to reflect that the hold is expired at the exact boundary."
+    },
+    {
+      "candidate_ids": [
+        "GH-R4-WRONG",
+        "UT-R4-WRONG"
+      ],
+      "category": "coverage",
+      "issue": "Although the required boundary 'now == expiresAt' is nominally present in both a unit test and a Gherkin scenario, neither actually verifies the requirement's true expected behavior (allowing re-HOLD). As written, R4 has no candidate that correctly exercises and confirms the mandated boundary outcome, leaving the requirement effectively uncovered despite the boundary condition's presence.",
+      "requirement_ids": [
+        "R4"
+      ],
+      "suggestion": "Add or correct a unit test and Gherkin scenario for R4 whose expected outcome is 're-HOLD is allowed' when now == expiresAt, so the mandated boundary is both present and semantically validated."
+    },
+    {
+      "candidate_ids": [
+        "GH-R3",
+        "UT-R3"
+      ],
+      "category": "unambiguity",
+      "issue": "The setup/given for R3 only states '기존 HOLD가 만료되었다' without specifying the concrete time relation (e.g., now > expiresAt). Given that R4 treats the exact boundary now == expiresAt distinctly from R3's 'expired' case, R3's condition should be made explicit to avoid overlap or ambiguity with the R4 boundary when implemented.",
+      "requirement_ids": [
+        "R3"
+      ],
+      "suggestion": "Make the expiration condition explicit, e.g., 'now > expiresAt인 HELD 좌석', so R3 and R4 boundaries are unambiguously distinguished during implementation."
+    }
+  ]
+}
+
+CURRENT EVAL (may be null):
+{
+  "coverage": {
+    "rationale": "R1-R3 are represented adequately, but the mandatory R4 boundary (now == expiresAt) is covered by GH-R4-WRONG and UT-R4-WRONG with an expected outcome that directly inverts the fixture's stated semantics: R4 says now==expiresAt must be treated as expired and re-HOLD must be allowed, while both candidates assert the existing HOLD is 'still active' and reject the re-HOLD request. This is not an incomplete boundary but a materially incorrect interpretation of a core requirement, so the required_boundaries condition for R4 is effectively unmet despite being nominally present.",
+    "score": 1
+  },
+  "executability": {
+    "rationale": "Setup/given, action/when, and expected/then fields are concrete and map cleanly onto JUnit given-when-then or Gherkin steps without needing new business rules invented (seat state, now/expiresAt comparison, and pass/fail outcome are all explicit). Score is not a 5 because R3/UT-R3 omit an explicit numeric or comparative boundary for 'expired', requiring a small interpretive step to encode the exact time relation in an executable test.",
+    "score": 4
+  },
+  "independence": {
+    "rationale": "Each unit test and each Gherkin scenario defines its own Given/setup (seat state, now vs expiresAt relation) independently, with no reference to other candidates, shared mutable fixtures, or required execution order. All eight candidates can be run in isolation and in any order without cross-dependency.",
+    "score": 5
+  },
+  "unambiguity": {
+    "rationale": "Most candidates state precondition, action, and expected result in objectively decidable terms (e.g. 'now < expiresAt' -> reject, 'now == expiresAt' -> reject-per-candidate). The R4 candidates are internally unambiguous (clear condition, clear expected outcome) even though that outcome is wrong per the fixture — decidability and correctness are separate concerns. Minor deduction because R3/UT-R3 rely on the phrase '기존 HOLD가 만료되었다' without an explicit now/expiresAt relation, leaving the exact boundary value used for 'expired' open to interpretation.",
+    "score": 4
+  }
+}
+
+DETERMINISTIC VALIDATION / DECISION FAILURES:
+{
+  "details": [
+    {
+      "actual": 14,
+      "code": "EVAL_TOTAL_BELOW_MIN",
+      "minimum": 16
+    },
+    {
+      "actual": {
+        "coverage": 1
+      },
+      "code": "EVAL_AXIS_BELOW_MIN",
+      "minimum": 3
+    },
+    {
+      "code": "EVAL_SCORE_SUMMARY",
+      "computed_total": 14,
+      "reported_total_ignored": null,
+      "scores": {
+        "coverage": 1,
+        "executability": 4,
+        "independence": 5,
+        "unambiguity": 4
+      }
+    }
+  ],
+  "failure_codes": [
+    "EVAL_TOTAL_BELOW_MIN",
+    "EVAL_AXIS_BELOW_MIN"
+  ],
+  "status": "REJECT"
+}
+
+TEST CANDIDATE JSON SCHEMA:
+{
+  "$defs": {
+    "boundaryCondition": {
+      "additionalProperties": false,
+      "properties": {
+        "condition": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "expected": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "condition",
+        "expected"
+      ],
+      "type": "object"
+    },
+    "gherkinCandidate": {
+      "additionalProperties": false,
+      "properties": {
+        "boundary_conditions": {
+          "items": {
+            "$ref": "#/$defs/boundaryCondition"
+          },
+          "type": "array"
+        },
+        "candidate_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "given": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "kind": {
+          "const": "gherkin"
+        },
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "requirement_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "then": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "when": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "kind",
+        "requirement_ids",
+        "name",
+        "given",
+        "when",
+        "then",
+        "boundary_conditions"
+      ],
+      "type": "object"
+    },
+    "unitCandidate": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "boundary_conditions": {
+          "items": {
+            "$ref": "#/$defs/boundaryCondition"
+          },
+          "type": "array"
+        },
+        "candidate_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "expected": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        "kind": {
+          "const": "unit"
+        },
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "requirement_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "setup": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "kind",
+        "requirement_ids",
+        "name",
+        "setup",
+        "action",
+        "expected",
+        "boundary_conditions"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "test-candidate.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "candidate_set_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "gherkin_scenarios": {
+      "items": {
+        "$ref": "#/$defs/gherkinCandidate"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "0.1"
+    },
+    "unit_tests": {
+      "items": {
+        "$ref": "#/$defs/unitCandidate"
+      },
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "candidate_set_id",
+    "unit_tests",
+    "gherkin_scenarios"
+  ],
+  "type": "object"
+}

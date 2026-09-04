@@ -1,0 +1,174 @@
+{
+  "candidate_set_id": "seat-hold-semantic-fixed-v1",
+  "schema_version": "0.1",
+  "gherkin_scenarios": [
+    {
+      "candidate_id": "GH-R1",
+      "kind": "gherkin",
+      "requirement_ids": [
+        "R1"
+      ],
+      "name": "AVAILABLE 좌석 HOLD 성공",
+      "given": [
+        "좌석이 AVAILABLE 상태이다."
+      ],
+      "when": [
+        "사용자가 해당 좌석에 HOLD를 요청한다."
+      ],
+      "then": [
+        "HOLD 요청이 성공한다."
+      ],
+      "boundary_conditions": []
+    },
+    {
+      "candidate_id": "GH-R2",
+      "kind": "gherkin",
+      "requirement_ids": [
+        "R2"
+      ],
+      "name": "유효한 HOLD 재요청 거절",
+      "given": [
+        "좌석이 HELD 상태이고 now < expiresAt이다."
+      ],
+      "when": [
+        "사용자가 해당 좌석에 다시 HOLD를 요청한다."
+      ],
+      "then": [
+        "재-HOLD 요청이 거절된다."
+      ],
+      "boundary_conditions": [
+        {
+          "condition": "now < expiresAt",
+          "expected": "existing HOLD is active"
+        }
+      ]
+    },
+    {
+      "candidate_id": "GH-R3",
+      "kind": "gherkin",
+      "requirement_ids": [
+        "R3"
+      ],
+      "name": "만료된 HOLD 재요청 허용",
+      "given": [
+        "좌석이 HELD 상태이고 now > expiresAt인 만료 상태이다."
+      ],
+      "when": [
+        "사용자가 해당 좌석에 다시 HOLD를 요청한다."
+      ],
+      "then": [
+        "재-HOLD가 허용된다."
+      ],
+      "boundary_conditions": [
+        {
+          "condition": "now > expiresAt",
+          "expected": "existing HOLD is expired"
+        }
+      ]
+    },
+    {
+      "candidate_id": "GH-R4",
+      "kind": "gherkin",
+      "requirement_ids": [
+        "R4"
+      ],
+      "name": "정확한 만료 시각(now == expiresAt)에 재-HOLD 허용",
+      "given": [
+        "좌석이 HELD 상태이고 now == expiresAt이다."
+      ],
+      "when": [
+        "사용자가 해당 좌석에 다시 HOLD를 요청한다."
+      ],
+      "then": [
+        "기존 HOLD는 만료된 것으로 판단되어 재-HOLD 요청이 허용된다."
+      ],
+      "boundary_conditions": [
+        {
+          "condition": "now == expiresAt",
+          "expected": "existing HOLD is treated as expired"
+        }
+      ]
+    }
+  ],
+  "unit_tests": [
+    {
+      "candidate_id": "UT-R1",
+      "kind": "unit",
+      "requirement_ids": [
+        "R1"
+      ],
+      "name": "available_seat_hold_succeeds",
+      "setup": [
+        "좌석 상태는 AVAILABLE이다."
+      ],
+      "action": "해당 좌석에 HOLD를 요청한다.",
+      "expected": [
+        "HOLD 요청이 성공한다."
+      ],
+      "boundary_conditions": []
+    },
+    {
+      "candidate_id": "UT-R2",
+      "kind": "unit",
+      "requirement_ids": [
+        "R2"
+      ],
+      "name": "active_hold_rehold_is_rejected",
+      "setup": [
+        "좌석 상태는 HELD이고 now < expiresAt이다."
+      ],
+      "action": "해당 좌석에 다시 HOLD를 요청한다.",
+      "expected": [
+        "재-HOLD 요청이 거절된다."
+      ],
+      "boundary_conditions": [
+        {
+          "condition": "now < expiresAt",
+          "expected": "existing HOLD is active"
+        }
+      ]
+    },
+    {
+      "candidate_id": "UT-R3",
+      "kind": "unit",
+      "requirement_ids": [
+        "R3"
+      ],
+      "name": "expired_hold_can_be_reheld",
+      "setup": [
+        "좌석 상태는 HELD이고 now > expiresAt이다."
+      ],
+      "action": "해당 좌석에 다시 HOLD를 요청한다.",
+      "expected": [
+        "재-HOLD가 허용된다."
+      ],
+      "boundary_conditions": [
+        {
+          "condition": "now > expiresAt",
+          "expected": "existing HOLD is expired"
+        }
+      ]
+    },
+    {
+      "candidate_id": "UT-R4",
+      "kind": "unit",
+      "requirement_ids": [
+        "R4"
+      ],
+      "name": "exact_expiration_boundary_allows_rehold",
+      "setup": [
+        "좌석 상태는 HELD이고 now == expiresAt이다."
+      ],
+      "action": "해당 좌석에 다시 HOLD를 요청한다.",
+      "expected": [
+        "기존 HOLD는 만료된 것으로 판단되어 재-HOLD 요청이 허용된다."
+      ],
+      "boundary_conditions": [
+        {
+          "condition": "now == expiresAt",
+          "expected": "existing HOLD is treated as expired"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "details": [
+    {
+      "actual": 14,
+      "code": "EVAL_TOTAL_BELOW_MIN",
+      "minimum": 16
+    },
+    {
+      "actual": {
+        "coverage": 1
+      },
+      "code": "EVAL_AXIS_BELOW_MIN",
+      "minimum": 3
+    },
+    {
+      "code": "EVAL_SCORE_SUMMARY",
+      "computed_total": 14,
+      "reported_total_ignored": null,
+      "scores": {
+        "coverage": 1,
+        "executability": 4,
+        "independence": 5,
+        "unambiguity": 4
+      }
+    },
+    {
+      "code": "REFINE_REQUIRED",
+      "iteration": 1,
+      "next_iteration": 2
+    }
+  ],
+  "failure_codes": [
+    "EVAL_TOTAL_BELOW_MIN",
+    "EVAL_AXIS_BELOW_MIN"
+  ],
+  "status": "REJECT"
+}

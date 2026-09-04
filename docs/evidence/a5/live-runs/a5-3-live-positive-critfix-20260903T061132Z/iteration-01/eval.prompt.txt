@@ -1,0 +1,298 @@
+You are the fresh Independent Eval role in a Requirement → Test Harness.
+
+Evaluate the current candidate only from the authoritative requirement fixture, the candidate itself, and this fixed rubric. You have not seen Critique output, previous Eval scores, expected PASS status, or desired correction directions.
+
+Output exactly one JSON object conforming to the supplied Eval JSON Schema. Do not output PASS/REJECT or a final harness verdict.
+
+RUBRIC — score each axis from 1 to 5:
+
+coverage
+1: Multiple core requirements are missing or materially misinterpreted.
+3: Main requirements are represented, but a failure/boundary condition is incomplete, unclear, or an extra business assumption is introduced.
+5: All requirements and essential boundaries are represented with correct semantics, without adding business contracts not present in the fixture.
+
+unambiguity
+1: Preconditions or expected outcomes are not objectively decidable; vague phrases substitute for assertions.
+3: Mostly decidable, but some setup, boundary, or expected result still requires interpretation.
+5: Preconditions, action, expected result, and relevant boundary are explicit and objectively decidable.
+
+independence
+1: A candidate depends on another test's prior execution, mutable shared state, or execution order.
+3: Mostly independent, but initialization/reset assumptions remain unclear in some candidates.
+5: Each candidate defines its own initial state and does not rely on another candidate or execution order.
+
+executability
+1: Idea-level prose requiring substantial new requirement inference before it can become a JUnit/Gherkin test.
+3: Implementable, but fixture/setup/assertion details still require some interpretation.
+5: Concrete enough to translate to JUnit/Gherkin without inventing new business requirements.
+
+Important:
+- requirement_ids are only traceability metadata. Check actual semantics.
+- A boundary marker being present does not prove that its meaning or expected outcome is correct.
+- Do not give a score to satisfy a threshold. Apply the rubric to the observed candidate.
+- rationale must explain the evidence for each score.
+- reported_total, if supplied, is informational only; the harness computes its own total.
+- Output JSON only, with no Markdown fences or extra prose.
+
+AUTHORITATIVE REQUIREMENT FIXTURE:
+{
+  "fixture_id": "seat-hold-v0",
+  "required_boundaries": [
+    {
+      "condition": "now == expiresAt",
+      "requirement_id": "R4"
+    }
+  ],
+  "required_candidate_kinds": [
+    "unit",
+    "gherkin"
+  ],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "AVAILABLE 좌석에 HOLD 요청 시 성공한다."
+    },
+    {
+      "id": "R2",
+      "text": "now < expiresAt인 HELD 좌석에 재-HOLD를 요청하면 거절한다."
+    },
+    {
+      "id": "R3",
+      "text": "만료된 HELD 좌석에 재-HOLD를 요청하면 허용한다."
+    },
+    {
+      "id": "R4",
+      "text": "now == expiresAt이면 기존 HOLD를 만료된 것으로 판단하고 재-HOLD를 허용한다."
+    }
+  ]
+}
+
+CURRENT TEST CANDIDATE:
+{
+  "candidate_set_id": "seat-hold-v0-candidates",
+  "gherkin_scenarios": [
+    {
+      "boundary_conditions": [],
+      "candidate_id": "gherkin-r1-hold-available-seat",
+      "given": [
+        "좌석 상태가 AVAILABLE이다"
+      ],
+      "kind": "gherkin",
+      "name": "AVAILABLE 좌석에 HOLD 요청 시 성공한다",
+      "requirement_ids": [
+        "R1"
+      ],
+      "then": [
+        "HOLD 요청이 성공한다",
+        "좌석 상태가 HELD로 변경된다"
+      ],
+      "when": [
+        "해당 좌석에 HOLD를 요청한다"
+      ]
+    },
+    {
+      "boundary_conditions": [],
+      "candidate_id": "gherkin-r2-rehold-rejected-while-active",
+      "given": [
+        "좌석 상태가 HELD이다",
+        "좌석의 expiresAt이 설정되어 있다",
+        "현재 시각(now)이 expiresAt보다 이전이다"
+      ],
+      "kind": "gherkin",
+      "name": "만료되지 않은 HELD 좌석에 재-HOLD 요청 시 거절한다",
+      "requirement_ids": [
+        "R2"
+      ],
+      "then": [
+        "재-HOLD 요청이 거절된다",
+        "좌석은 기존 HELD 상태와 expiresAt을 유지한다"
+      ],
+      "when": [
+        "해당 좌석에 재-HOLD를 요청한다"
+      ]
+    },
+    {
+      "boundary_conditions": [],
+      "candidate_id": "gherkin-r3-rehold-allowed-after-expiry",
+      "given": [
+        "좌석 상태가 HELD이다",
+        "좌석의 expiresAt이 설정되어 있다",
+        "현재 시각(now)이 expiresAt보다 이후이다"
+      ],
+      "kind": "gherkin",
+      "name": "만료된 HELD 좌석에 재-HOLD 요청 시 허용한다",
+      "requirement_ids": [
+        "R3"
+      ],
+      "then": [
+        "재-HOLD 요청이 성공한다",
+        "좌석 상태가 새로운 HOLD로 HELD가 된다"
+      ],
+      "when": [
+        "해당 좌석에 재-HOLD를 요청한다"
+      ]
+    },
+    {
+      "boundary_conditions": [
+        {
+          "condition": "now == expiresAt",
+          "expected": "기존 HOLD를 만료된 것으로 판단하고 재-HOLD를 허용한다"
+        }
+      ],
+      "candidate_id": "gherkin-r4-rehold-allowed-at-exact-expiry",
+      "given": [
+        "좌석 상태가 HELD이다",
+        "좌석의 expiresAt이 설정되어 있다",
+        "현재 시각(now)이 expiresAt과 정확히 같다"
+      ],
+      "kind": "gherkin",
+      "name": "now == expiresAt일 때 재-HOLD 요청 시 허용한다",
+      "requirement_ids": [
+        "R4"
+      ],
+      "then": [
+        "기존 HOLD가 만료된 것으로 판단된다",
+        "재-HOLD 요청이 성공한다",
+        "좌석 상태가 새로운 HOLD로 HELD가 된다"
+      ],
+      "when": [
+        "해당 좌석에 재-HOLD를 요청한다"
+      ]
+    }
+  ],
+  "schema_version": "0.1",
+  "unit_tests": [
+    {
+      "action": "request HOLD on the seat",
+      "boundary_conditions": [],
+      "candidate_id": "unit-r1-hold-available-seat-succeeds",
+      "expected": [
+        "HOLD request succeeds",
+        "seat state becomes HELD"
+      ],
+      "kind": "unit",
+      "name": "AVAILABLE 좌석에 HOLD 요청 시 성공한다",
+      "requirement_ids": [
+        "R1"
+      ],
+      "setup": [
+        "seat state is AVAILABLE"
+      ]
+    },
+    {
+      "action": "request re-HOLD on the seat",
+      "boundary_conditions": [],
+      "candidate_id": "unit-r2-rehold-active-held-seat-rejected",
+      "expected": [
+        "re-HOLD request is rejected",
+        "seat state remains HELD with original expiresAt"
+      ],
+      "kind": "unit",
+      "name": "now < expiresAt인 HELD 좌석에 재-HOLD 요청 시 거절한다",
+      "requirement_ids": [
+        "R2"
+      ],
+      "setup": [
+        "seat state is HELD",
+        "seat expiresAt is set",
+        "now < expiresAt"
+      ]
+    },
+    {
+      "action": "request re-HOLD on the seat",
+      "boundary_conditions": [],
+      "candidate_id": "unit-r3-rehold-expired-held-seat-allowed",
+      "expected": [
+        "re-HOLD request succeeds",
+        "seat state becomes HELD with new hold"
+      ],
+      "kind": "unit",
+      "name": "만료된 HELD 좌석에 재-HOLD 요청 시 허용한다",
+      "requirement_ids": [
+        "R3"
+      ],
+      "setup": [
+        "seat state is HELD",
+        "seat expiresAt is set",
+        "now > expiresAt"
+      ]
+    },
+    {
+      "action": "request re-HOLD on the seat",
+      "boundary_conditions": [
+        {
+          "condition": "now == expiresAt",
+          "expected": "existing HOLD is treated as expired and re-HOLD is allowed"
+        }
+      ],
+      "candidate_id": "unit-r4-rehold-at-exact-expiry-boundary-allowed",
+      "expected": [
+        "existing HOLD is treated as expired",
+        "re-HOLD request succeeds",
+        "seat state becomes HELD with new hold"
+      ],
+      "kind": "unit",
+      "name": "now == expiresAt인 HELD 좌석에 재-HOLD 요청 시 허용한다",
+      "requirement_ids": [
+        "R4"
+      ],
+      "setup": [
+        "seat state is HELD",
+        "seat expiresAt is set",
+        "now == expiresAt"
+      ]
+    }
+  ]
+}
+
+EVAL JSON SCHEMA:
+{
+  "$defs": {
+    "axis": {
+      "additionalProperties": false,
+      "properties": {
+        "rationale": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "score": {
+          "maximum": 5,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "score",
+        "rationale"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "eval.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "coverage": {
+      "$ref": "#/$defs/axis"
+    },
+    "executability": {
+      "$ref": "#/$defs/axis"
+    },
+    "independence": {
+      "$ref": "#/$defs/axis"
+    },
+    "reported_total": {
+      "type": "integer"
+    },
+    "unambiguity": {
+      "$ref": "#/$defs/axis"
+    }
+  },
+  "required": [
+    "coverage",
+    "unambiguity",
+    "independence",
+    "executability"
+  ],
+  "type": "object"
+}

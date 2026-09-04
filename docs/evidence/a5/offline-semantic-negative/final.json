@@ -1,0 +1,10 @@
+{
+  "computed_total": 14,
+  "failure_codes": [
+    "EVAL_TOTAL_BELOW_MIN",
+    "EVAL_AXIS_BELOW_MIN"
+  ],
+  "iteration": 1,
+  "run_id": "a5-3a-offline-semantic-negative-20260904T042827Z",
+  "status": "REJECT"
+}

@@ -1,0 +1,17 @@
+{
+  "fixture_id": "seat-hold-v0",
+  "iteration": 1,
+  "max_iterations": 3,
+  "min_axis": 3,
+  "min_total": 16,
+  "mode": "deterministic-offline",
+  "rubric_id": "test-quality-v0",
+  "rubric_path": "a5-harness/rubrics/test-quality-v0.yaml",
+  "rubric_weights": {
+    "coverage": 1,
+    "executability": 1,
+    "independence": 1,
+    "unambiguity": 1
+  },
+  "run_id": "a5-3a-offline-semantic-negative-20260904T042827Z"
+}

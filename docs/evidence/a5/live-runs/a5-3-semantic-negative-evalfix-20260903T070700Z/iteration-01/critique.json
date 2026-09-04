@@ -1,0 +1,40 @@
+{
+  "issues": [
+    {
+      "candidate_ids": [
+        "GH-R4-WRONG",
+        "UT-R4-WRONG"
+      ],
+      "category": "extra_assumption",
+      "issue": "R4 explicitly states that when now == expiresAt, the existing HOLD must be treated as expired and re-HOLD must be allowed. Both candidates assert the opposite: they treat now == expiresAt as 'still active' and expect the re-HOLD to be rejected. This is not a variant interpretation of an ambiguous requirement — it directly contradicts the stated requirement text, introducing behavior (treating the exact expiry instant as active) that the fixture does not support and in fact explicitly forbids.",
+      "requirement_ids": [
+        "R4"
+      ],
+      "suggestion": "Invert the expected outcome for both the Given/When/Then and setup/action/expected: given a seat HELD with now == expiresAt, the existing HOLD should be judged expired, and the re-HOLD request should succeed. Update boundary_conditions' 'expected' field from 'existing HOLD is still active' to reflect that the hold is expired at the exact boundary."
+    },
+    {
+      "candidate_ids": [
+        "GH-R4-WRONG",
+        "UT-R4-WRONG"
+      ],
+      "category": "coverage",
+      "issue": "Although the required boundary 'now == expiresAt' is nominally present in both a unit test and a Gherkin scenario, neither actually verifies the requirement's true expected behavior (allowing re-HOLD). As written, R4 has no candidate that correctly exercises and confirms the mandated boundary outcome, leaving the requirement effectively uncovered despite the boundary condition's presence.",
+      "requirement_ids": [
+        "R4"
+      ],
+      "suggestion": "Add or correct a unit test and Gherkin scenario for R4 whose expected outcome is 're-HOLD is allowed' when now == expiresAt, so the mandated boundary is both present and semantically validated."
+    },
+    {
+      "candidate_ids": [
+        "GH-R3",
+        "UT-R3"
+      ],
+      "category": "unambiguity",
+      "issue": "The setup/given for R3 only states '기존 HOLD가 만료되었다' without specifying the concrete time relation (e.g., now > expiresAt). Given that R4 treats the exact boundary now == expiresAt distinctly from R3's 'expired' case, R3's condition should be made explicit to avoid overlap or ambiguity with the R4 boundary when implemented.",
+      "requirement_ids": [
+        "R3"
+      ],
+      "suggestion": "Make the expiration condition explicit, e.g., 'now > expiresAt인 HELD 좌석', so R3 and R4 boundaries are unambiguously distinguished during implementation."
+    }
+  ]
+}

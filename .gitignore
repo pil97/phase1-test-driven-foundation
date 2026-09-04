@@ -1,0 +1,11 @@
+.gradle/
+build/
+.idea/
+*.iml
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+venv/
+.vscode/
+a5-harness/runs/

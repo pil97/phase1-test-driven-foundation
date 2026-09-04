@@ -1,0 +1,13 @@
+{
+  "fixture_id": "seat-hold-v0",
+  "fresh_context_strategy": "separate claude -p process per role; no --continue/--resume",
+  "live_ai_call": true,
+  "max_iterations": 3,
+  "min_axis": 3,
+  "min_total": 16,
+  "mode": "positive",
+  "model": "UNKNOWN",
+  "provider": "claude-code-cli",
+  "provider_version": "2.1.222 (Claude Code)",
+  "run_id": "a5-3-live-positive-critfix-20260903T061132Z"
+}

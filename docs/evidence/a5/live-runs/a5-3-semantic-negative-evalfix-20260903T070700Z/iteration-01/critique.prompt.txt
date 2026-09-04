@@ -1,0 +1,295 @@
+You are the independent Critique role in a Requirement → Test Harness.
+
+You did not create the candidate. Review it only against the authoritative requirement fixture and the supplied Critique JSON Schema.
+
+STRICT JSON SERIALIZATION CONTRACT:
+- Return exactly one JSON object conforming to the supplied Critique JSON Schema.
+- The first non-whitespace character of your response MUST be `{`.
+- The last non-whitespace character of your response MUST be `}`.
+- Never wrap the JSON in Markdown fences such as ```json or ```.
+- Output no commentary before or after the JSON.
+- Before responding, verify internally that the object conforms to the supplied schema.
+- Do not output that verification.
+
+ROLE BOUNDARY:
+- The authoritative requirement fixture is the complete business-requirement authority for this review.
+- Do not create new actors, ownership rules, identifiers, response codes, status fields, logs, events, TTL rules, exception contracts, APIs, or observable system behavior that the fixture does not state.
+- Do not require additional boundary cases merely because they might be useful in a broader production test suite.
+- A suggestion may recommend removing an unsupported assumption, making an existing requirement more explicit in the candidate, or aligning the candidate back to the supplied requirement.
+- If the candidate itself introduces behavior not supported by the fixture, report it as `extra_assumption` when appropriate.
+- Judge executability only to the level required to translate the supplied requirement into a Unit/Gherkin test contract; do not demand implementation-specific observability that the requirement does not provide.
+
+Your job:
+- Find meaningful defects or weaknesses in coverage, unambiguity, independence, executability, or extra assumptions.
+- Connect each issue to relevant requirement_ids and candidate_ids when applicable.
+- Explain the issue and give a correction direction.
+
+Strict prohibitions:
+- Do not rewrite or replace the candidate.
+- Do not assign scores.
+- Do not output PASS, REJECT, final_status, or an overall verdict.
+- Do not invent new business requirements.
+- Do not assume that a requirement_id label proves semantic correctness; inspect the candidate's actual setup/action/expected and Given/When/Then meaning.
+- Output JSON only. No Markdown fences or prose outside the JSON object.
+
+AUTHORITATIVE REQUIREMENT FIXTURE:
+{
+  "fixture_id": "seat-hold-v0",
+  "required_boundaries": [
+    {
+      "condition": "now == expiresAt",
+      "requirement_id": "R4"
+    }
+  ],
+  "required_candidate_kinds": [
+    "unit",
+    "gherkin"
+  ],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "AVAILABLE 좌석에 HOLD 요청 시 성공한다."
+    },
+    {
+      "id": "R2",
+      "text": "now < expiresAt인 HELD 좌석에 재-HOLD를 요청하면 거절한다."
+    },
+    {
+      "id": "R3",
+      "text": "만료된 HELD 좌석에 재-HOLD를 요청하면 허용한다."
+    },
+    {
+      "id": "R4",
+      "text": "now == expiresAt이면 기존 HOLD를 만료된 것으로 판단하고 재-HOLD를 허용한다."
+    }
+  ]
+}
+
+CURRENT TEST CANDIDATE:
+{
+  "candidate_set_id": "seat-hold-semantic-wrong-v0",
+  "gherkin_scenarios": [
+    {
+      "boundary_conditions": [],
+      "candidate_id": "GH-R1",
+      "given": [
+        "좌석이 AVAILABLE 상태이다."
+      ],
+      "kind": "gherkin",
+      "name": "AVAILABLE 좌석 HOLD 성공",
+      "requirement_ids": [
+        "R1"
+      ],
+      "then": [
+        "HOLD 요청이 성공한다."
+      ],
+      "when": [
+        "사용자가 해당 좌석에 HOLD를 요청한다."
+      ]
+    },
+    {
+      "boundary_conditions": [
+        {
+          "condition": "now < expiresAt",
+          "expected": "existing HOLD is active"
+        }
+      ],
+      "candidate_id": "GH-R2",
+      "given": [
+        "좌석이 HELD 상태이고 now < expiresAt이다."
+      ],
+      "kind": "gherkin",
+      "name": "유효한 HOLD 재요청 거절",
+      "requirement_ids": [
+        "R2"
+      ],
+      "then": [
+        "재-HOLD 요청이 거절된다."
+      ],
+      "when": [
+        "사용자가 해당 좌석에 다시 HOLD를 요청한다."
+      ]
+    },
+    {
+      "boundary_conditions": [],
+      "candidate_id": "GH-R3",
+      "given": [
+        "좌석이 HELD 상태이고 기존 HOLD가 만료되었다."
+      ],
+      "kind": "gherkin",
+      "name": "만료된 HOLD 재요청 허용",
+      "requirement_ids": [
+        "R3"
+      ],
+      "then": [
+        "재-HOLD가 허용된다."
+      ],
+      "when": [
+        "사용자가 해당 좌석에 다시 HOLD를 요청한다."
+      ]
+    },
+    {
+      "boundary_conditions": [
+        {
+          "condition": "now == expiresAt",
+          "expected": "existing HOLD is still active"
+        }
+      ],
+      "candidate_id": "GH-R4-WRONG",
+      "given": [
+        "좌석이 HELD 상태이고 now == expiresAt이다."
+      ],
+      "kind": "gherkin",
+      "name": "정확한 만료 시각을 active로 취급하는 잘못된 시나리오",
+      "requirement_ids": [
+        "R4"
+      ],
+      "then": [
+        "기존 HOLD는 아직 active이므로 재-HOLD 요청이 거절된다."
+      ],
+      "when": [
+        "사용자가 해당 좌석에 다시 HOLD를 요청한다."
+      ]
+    }
+  ],
+  "schema_version": "0.1",
+  "unit_tests": [
+    {
+      "action": "해당 좌석에 HOLD를 요청한다.",
+      "boundary_conditions": [],
+      "candidate_id": "UT-R1",
+      "expected": [
+        "HOLD 요청이 성공한다."
+      ],
+      "kind": "unit",
+      "name": "available_seat_hold_succeeds",
+      "requirement_ids": [
+        "R1"
+      ],
+      "setup": [
+        "좌석 상태는 AVAILABLE이다."
+      ]
+    },
+    {
+      "action": "해당 좌석에 다시 HOLD를 요청한다.",
+      "boundary_conditions": [
+        {
+          "condition": "now < expiresAt",
+          "expected": "existing HOLD is active"
+        }
+      ],
+      "candidate_id": "UT-R2",
+      "expected": [
+        "재-HOLD 요청이 거절된다."
+      ],
+      "kind": "unit",
+      "name": "active_hold_rehold_is_rejected",
+      "requirement_ids": [
+        "R2"
+      ],
+      "setup": [
+        "좌석 상태는 HELD이고 now < expiresAt이다."
+      ]
+    },
+    {
+      "action": "해당 좌석에 다시 HOLD를 요청한다.",
+      "boundary_conditions": [],
+      "candidate_id": "UT-R3",
+      "expected": [
+        "재-HOLD가 허용된다."
+      ],
+      "kind": "unit",
+      "name": "expired_hold_can_be_reheld",
+      "requirement_ids": [
+        "R3"
+      ],
+      "setup": [
+        "좌석 상태는 HELD이고 기존 HOLD가 만료되었다."
+      ]
+    },
+    {
+      "action": "해당 좌석에 다시 HOLD를 요청한다.",
+      "boundary_conditions": [
+        {
+          "condition": "now == expiresAt",
+          "expected": "existing HOLD is still active"
+        }
+      ],
+      "candidate_id": "UT-R4-WRONG",
+      "expected": [
+        "기존 HOLD는 아직 active이므로 재-HOLD 요청이 거절된다."
+      ],
+      "kind": "unit",
+      "name": "exact_expiration_is_still_active_wrong",
+      "requirement_ids": [
+        "R4"
+      ],
+      "setup": [
+        "좌석 상태는 HELD이고 now == expiresAt이다."
+      ]
+    }
+  ]
+}
+
+CRITIQUE JSON SCHEMA:
+{
+  "$id": "critique.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "issues": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "candidate_ids": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "category": {
+            "enum": [
+              "coverage",
+              "unambiguity",
+              "independence",
+              "executability",
+              "extra_assumption",
+              "other"
+            ]
+          },
+          "issue": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "requirement_ids": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "suggestion": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "requirement_ids",
+          "candidate_ids",
+          "issue",
+          "suggestion"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "issues"
+  ],
+  "type": "object"
+}

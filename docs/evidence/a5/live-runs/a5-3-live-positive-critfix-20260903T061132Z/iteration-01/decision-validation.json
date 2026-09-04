@@ -1,0 +1,17 @@
+{
+  "details": [
+    {
+      "code": "EVAL_SCORE_SUMMARY",
+      "computed_total": 18,
+      "reported_total_ignored": null,
+      "scores": {
+        "coverage": 5,
+        "executability": 4,
+        "independence": 5,
+        "unambiguity": 4
+      }
+    }
+  ],
+  "failure_codes": [],
+  "status": "PASS"
+}
