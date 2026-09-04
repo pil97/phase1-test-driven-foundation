@@ -1,10 +1,12 @@
-# A-5 — Requirement → Test Harness Evidence
+# A-5 — Requirement → Test Harness 검증 기록
 
-## Purpose
+## 목적
 
-A-5 built a Requirement-to-Test Harness that separates AI role execution from deterministic validation and final decision authority.
+A-5에서는 AI role execution과 deterministic validation, 최종 decision authority를 분리하는 Requirement-to-Test Harness를 구현했습니다.
 
-## Architecture
+Phase 0의 Harness v0는 수동으로 운용한 Harness였고, A-5에서는 이를 구조 계약과 실행 가능한 validation/decision 흐름으로 발전시켰습니다.
+
+## 구조
 
 ```text
 Authoritative Requirement Fixture
@@ -17,19 +19,21 @@ Authoritative Requirement Fixture
 → repeat up to MAX_ITERATIONS
 ```
 
-`MAX_ITERATIONS = 3` is runner lifecycle configuration.
+`MAX_ITERATIONS = 3`은 runner lifecycle configuration입니다.
 
-The AI provider may execute Gen, Critique, Independent Eval, and Refine roles, but it does not own the final PASS/REJECT decision.
+AI provider는 Gen, Critique, Independent Eval, Refine role을 실행할 수 있지만 최종 PASS/REJECT 판단 권한은 갖지 않습니다.
 
-## Contracts and authority
+전체 semantic evaluation이 deterministic한 것은 아닙니다. Independent AI Eval이 의미 품질을 평가하고, deterministic Runner가 최종 score 계산, threshold 적용, PASS/REJECT 및 lifecycle을 담당합니다.
+
+## 계약과 authority
 
 ### JSON Schema
 
-JSON Schemas define structural contracts for requirement fixtures, generated candidates, critique output, and Eval output.
+JSON Schema는 requirement fixture, generated candidate, critique output, Eval output의 구조 계약을 정의합니다.
 
 ### YAML Rubric
 
-The canonical semantic scoring authority is:
+Canonical semantic scoring authority:
 
 [`a5-harness/rubrics/test-quality-v0.yaml`](../../a5-harness/rubrics/test-quality-v0.yaml)
 
@@ -40,7 +44,7 @@ Rubric axes:
 - independence
 - executability
 
-Each axis uses:
+각 axis:
 
 - weight = 1
 - score range = 1..5
@@ -51,7 +55,7 @@ Decision thresholds:
 - `min_total = 16`
 - `min_axis = 3`
 
-The same YAML rubric is loaded into both the Eval prompt and deterministic decision path.
+동일한 YAML rubric을 Eval prompt와 deterministic decision path에서 함께 로드합니다.
 
 ```text
 test-quality-v0.yaml
@@ -62,9 +66,11 @@ test-quality-v0.yaml
      └─→ Offline Decision
 ```
 
+Deterministic validator는 기계적으로 검사 가능한 계약을 확인합니다. Frozen self-test PASS는 인코딩된 계약 범위가 유지됨을 보장할 뿐, 그 밖의 모든 semantic correctness까지 자동으로 증명하지는 않습니다.
+
 ## Positive Live Run
 
-Public evidence:
+공개 evidence:
 
 [`a5-3-live-positive-critfix-20260903T061132Z`](a5/live-runs/a5-3-live-positive-critfix-20260903T061132Z/)
 
@@ -79,13 +85,13 @@ Computed total:
 
 `5 + 4 + 5 + 4 = 18`
 
-Result:
+결과:
 
 - iteration = 1
 - failure codes = none
 - status = PASS
 
-Key files:
+주요 파일:
 
 - [final.json](a5/live-runs/a5-3-live-positive-critfix-20260903T061132Z/final.json)
 - [decision-validation.json](a5/live-runs/a5-3-live-positive-critfix-20260903T061132Z/iteration-01/decision-validation.json)
@@ -93,13 +99,13 @@ Key files:
 
 ## Semantic-Negative → Refine Run
 
-Public evidence:
+공개 evidence:
 
 [`a5-3-semantic-negative-evalfix-20260903T070700Z`](a5/live-runs/a5-3-semantic-negative-evalfix-20260903T070700Z/)
 
-The initial candidate was structurally valid and traceable, so the deterministic candidate gate passed it.
+Initial candidate는 structurally valid하고 traceable했기 때문에 deterministic candidate gate를 통과했습니다.
 
-However, it intentionally reversed the exact-boundary meaning for `now == expiresAt`.
+하지만 `now == expiresAt`의 exact-boundary meaning을 의도적으로 반대로 구성했습니다.
 
 ### Iteration 1
 
@@ -124,7 +130,7 @@ Decision:
 - required per-axis minimum = 3
 - status = REJECT
 
-Key iteration-1 evidence:
+Iteration 1 주요 evidence:
 
 - [candidate-validation.json](a5/live-runs/a5-3-semantic-negative-evalfix-20260903T070700Z/iteration-01/candidate-validation.json)
 - [eval.json](a5/live-runs/a5-3-semantic-negative-evalfix-20260903T070700Z/iteration-01/eval.json)
@@ -132,7 +138,7 @@ Key iteration-1 evidence:
 
 ### Iteration 2 — Refine
 
-Refine corrected the exact-boundary semantics.
+Refine가 exact-boundary semantics를 수정했습니다.
 
 Independent Eval scores:
 
@@ -145,12 +151,12 @@ Computed total:
 
 `5 + 4 + 5 + 4 = 18`
 
-Result:
+결과:
 
 - iteration = 2
 - status = PASS
 
-Key iteration-2 evidence:
+Iteration 2 주요 evidence:
 
 - [refine.json](a5/live-runs/a5-3-semantic-negative-evalfix-20260903T070700Z/iteration-02/refine.json)
 - [eval.json](a5/live-runs/a5-3-semantic-negative-evalfix-20260903T070700Z/iteration-02/eval.json)
@@ -159,7 +165,7 @@ Key iteration-2 evidence:
 
 ## A-5-3A Offline Replay
 
-The final A-5-3 results were replayed without making new Live AI calls after YAML rubric authority was introduced.
+YAML rubric authority를 도입한 뒤 새로운 Live AI call을 만들지 않고 최종 A-5-3 결과를 replay했습니다.
 
 ### Positive replay
 
@@ -167,12 +173,12 @@ The final A-5-3 results were replayed without making new Live AI calls after YAM
 - computed total = 18
 - status = PASS
 
-Public sanitized evidence:
+공개 sanitized evidence:
 
 - [manifest.public.json](a5/offline-positive/manifest.public.json)
 - [decision-validation.json](a5/offline-positive/decision-validation.json)
 - [final.json](a5/offline-positive/final.json)
-- [sanitization notice](a5/offline-positive/README.md)
+- [sanitization 안내](a5/offline-positive/README.md)
 
 ### Semantic-negative replay
 
@@ -182,18 +188,18 @@ Public sanitized evidence:
 - `EVAL_AXIS_BELOW_MIN`
 - status = REJECT
 
-Public sanitized evidence:
+공개 sanitized evidence:
 
 - [manifest.public.json](a5/offline-semantic-negative/manifest.public.json)
 - [decision-validation.json](a5/offline-semantic-negative/decision-validation.json)
 - [final.json](a5/offline-semantic-negative/final.json)
-- [sanitization notice](a5/offline-semantic-negative/README.md)
+- [sanitization 안내](a5/offline-semantic-negative/README.md)
 
-The public offline manifests are explicitly sanitized copies. Original execution evidence is retained locally.
+Public offline manifest는 명시적으로 sanitized한 copy입니다. Original execution evidence는 local에 보존합니다.
 
 ## Deterministic self-tests
 
-A-5-3A added rubric-authority tests that verify:
+A-5-3A에서는 다음 rubric-authority test를 추가했습니다.
 
 - YAML parsing
 - exact four-axis contract
@@ -201,22 +207,27 @@ A-5-3A added rubric-authority tests that verify:
 - weights
 - decision thresholds
 - Eval prompt rendering from YAML
-- runtime proof that changing YAML thresholds or weights changes the deterministic decision
+- YAML threshold 또는 weight 변경이 deterministic decision에 영향을 주는 runtime proof
 
-Final Python regression:
+최종 Python regression:
 
 `26/26 PASS`
 
-Fresh temporary environment reproduction also passed all 26 tests.
+Fresh temporary environment reproduction에서도 26개 테스트를 모두 통과했습니다.
 
-## Public / local evidence policy
+## Public / local evidence 정책
 
-Public repository evidence includes:
+Public repository evidence:
 
 - final positive Live run
 - final semantic-negative / Refine Live run
 - sanitized offline replay evidence
 
-Local-only evidence includes intermediate authentication, debugging, and failure runs, plus original offline replay manifests containing local absolute paths.
+Local-only evidence:
 
-The local-only runs are not required to reproduce or understand the final accepted Harness behavior.
+- intermediate authentication run
+- debugging run
+- failure run
+- local absolute path가 포함된 original offline replay manifest
+
+Local-only run은 최종 accepted Harness behavior를 재현하거나 이해하는 데 필요하지 않습니다.

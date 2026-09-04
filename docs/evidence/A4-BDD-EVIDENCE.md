@@ -1,68 +1,68 @@
-# A-4 — BDD / Acceptance Evidence
+# A-4 — BDD / Acceptance 검증 기록
 
-> Historical execution summary based on the completed A-4 work.
-> This is not a reconstructed raw terminal log.
+> 이 문서는 완료된 A-4 작업을 기반으로 정리한 과거 실행 요약입니다.
+> 실제 터미널 원본 로그를 재구성한 문서가 아닙니다.
 
-## Scope
+## 범위
 
-A-4 translated the Seat HOLD requirements into executable BDD acceptance scenarios using Cucumber.
+A-4에서는 Seat HOLD 요구사항을 Cucumber를 사용한 실행 가능한 BDD acceptance scenario로 변환했습니다.
 
-The acceptance layer consisted of:
+Acceptance layer 구성:
 
 - `seat_hold.feature`
 - `RunCucumberTest.java`
 - `SeatHoldStepDefinitions.java`
 - `InMemorySeatRepository.java`
 
-## Acceptance scenarios
+## Acceptance scenario
 
-The Feature covered four core Seat HOLD behaviors:
+Feature는 네 가지 핵심 Seat HOLD 동작을 다룹니다.
 
-1. AVAILABLE seat -> HOLD succeeds.
-2. Active HELD seat -> re-HOLD is rejected.
-3. Expired HELD seat -> re-HOLD is allowed.
-4. Exact boundary `now == expiresAt` -> re-HOLD is allowed.
+1. AVAILABLE 좌석 → HOLD 성공
+2. Active HELD 좌석 → 재-HOLD 거절
+3. Expired HELD 좌석 → 재-HOLD 허용
+4. 정확한 경계 `now == expiresAt` → 재-HOLD 허용
 
 ## BDD RED
 
-After defining the Feature, the acceptance test initially reached an Undefined Step state.
+Feature를 정의한 직후 acceptance test는 처음에 Undefined Step 상태에 도달했습니다.
 
-This RED state demonstrated that the business scenario existed before the corresponding Step Definition implementation was complete.
+이 RED 상태는 business scenario가 먼저 존재하고, 그에 대응하는 Step Definition 구현은 아직 완료되지 않았음을 보여줬습니다.
 
 ## Acceptance GREEN
 
-The missing Step Definitions and in-memory repository support were then implemented.
+이후 누락된 Step Definitions와 in-memory repository support를 구현했습니다.
 
-After implementation, the Cucumber acceptance scenarios passed against the Seat HOLD domain.
+구현 후 Cucumber acceptance scenario가 Seat HOLD domain을 대상으로 통과했습니다.
 
-## AI implementation experiment
+## AI implementation 실험
 
-A separate AI-generated production-code candidate was evaluated against the acceptance contract.
+별도의 AI-generated production-code candidate를 acceptance contract에 대해 평가했습니다.
 
-The AI candidate performed its own review and reported:
+AI candidate는 자체 검토 후 다음과 같이 보고했습니다.
 
 `SELF_EVALUATION=NO`
 
-The experiment also exposed an A-3 API compatibility failure even though part of the requested behavior could appear semantically reasonable in isolation.
+이 실험에서는 일부 요청 동작이 개별적으로는 의미상 타당해 보일 수 있어도 기존 A-3 API compatibility failure가 발생할 수 있음을 확인했습니다.
 
-This showed that implementation correctness depended on more than one evaluation boundary.
+즉 implementation correctness는 하나의 evaluation boundary만으로 결정되지 않았습니다.
 
 ## Frozen acceptance contract
 
-The completed Feature and acceptance tests were treated as the frozen executable contract while candidate implementation behavior was evaluated.
+완료된 Feature와 acceptance test를 frozen executable contract로 두고 candidate implementation behavior를 평가했습니다.
 
-The final acceptance state passed together with the existing A-3 tests.
+최종 acceptance 상태는 기존 A-3 test와 함께 통과했습니다.
 
-## Main conclusion
+## 핵심 결론
 
-The experiment demonstrated that the evaluation scopes were different:
+실험을 통해 evaluation scope가 서로 다름을 확인했습니다.
 
-- self-evaluation examined the implementation from the candidate's own perspective
-- acceptance tests checked externally visible requirement behavior
-- existing A-3 tests also protected previously established API and domain compatibility
+- self-evaluation: candidate 자신의 관점에서 implementation을 검토
+- acceptance tests: 외부에서 보이는 requirement behavior를 검증
+- 기존 A-3 tests: 이전에 확립한 API 및 domain compatibility도 보호
 
-Passing one scope therefore did not automatically prove correctness in the others.
+따라서 하나의 scope를 통과했다고 해서 다른 scope의 correctness까지 자동으로 증명되지는 않습니다.
 
-## Final state
+## 최종 상태
 
-Final packaging regression confirmed the complete Gradle test suite remained successful and the authoritative A-3/A-4 baseline remained byte-identical.
+최종 packaging regression에서 전체 Gradle test suite가 계속 성공했고, authoritative A-3/A-4 baseline도 byte-identical하게 유지됨을 확인했습니다.
