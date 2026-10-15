@@ -31,11 +31,4 @@ public class Ticket {
         this.userId = userId;
     }
 
-    public void setReserved(boolean reserved) {
-        this.reserved = reserved;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
 }
