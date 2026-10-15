@@ -23,9 +23,7 @@ public class TicketService {
         }
 
         Ticket ticket = ticketRepo.findById(ticketId);
-        if (ticket.isReserved()) {
-            throw new TicketAlreadyReservedException();
-        }
+        ticket.validateReservable();
 
         boolean paymentSuccess =
                 paymentApi.charge(paymentInfo, ticket.getPrice());

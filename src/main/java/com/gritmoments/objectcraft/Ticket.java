@@ -20,6 +20,12 @@ public class Ticket {
         return price;
     }
 
+    public void validateReservable() {
+        if (reserved) {
+            throw new TicketAlreadyReservedException();
+        }
+    }
+
     public void reserveFor(long userId) {
         this.reserved = true;
         this.userId = userId;
