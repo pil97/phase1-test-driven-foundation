@@ -20,6 +20,11 @@ public class Ticket {
         return price;
     }
 
+    public void reserveFor(long userId) {
+        this.reserved = true;
+        this.userId = userId;
+    }
+
     public void setReserved(boolean reserved) {
         this.reserved = reserved;
     }

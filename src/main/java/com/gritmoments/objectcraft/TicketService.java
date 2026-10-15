@@ -34,14 +34,9 @@ public class TicketService {
             throw new PaymentFailedException();
         }
 
-        markTicketAsReservedForUser(ticket, userId);
+        ticket.reserveFor(userId);
         ticketRepo.save(ticket);
 
         return true;
-    }
-
-    private void markTicketAsReservedForUser(Ticket ticket, long userId) {
-        ticket.setReserved(true);
-        ticket.setUserId(userId);
     }
 }
