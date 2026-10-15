@@ -34,10 +34,14 @@ public class TicketService {
             throw new PaymentFailedException();
         }
 
-        ticket.setReserved(true);
-        ticket.setUserId(userId);
+        markTicketAsReservedForUser(ticket, userId);
         ticketRepo.save(ticket);
 
         return true;
+    }
+
+    private void markTicketAsReservedForUser(Ticket ticket, long userId) {
+        ticket.setReserved(true);
+        ticket.setUserId(userId);
     }
 }
