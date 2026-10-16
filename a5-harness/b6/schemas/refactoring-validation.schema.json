@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "B-6 Refactoring Validation Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "validation_id",
+    "gates",
+    "final_validation_status"
+  ],
+  "properties": {
+    "validation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "gates": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "gate_name",
+          "status",
+          "failure_codes",
+          "failure_reasons",
+          "evidence_references"
+        ],
+        "properties": {
+          "gate_name": {
+            "type": "string",
+            "enum": [
+              "SCHEMA_CHECK",
+              "TEST_GATE",
+              "BUILD_COMPILE_GATE",
+              "CHARACTERIZATION_REGRESSION_GATE",
+              "ALLOWED_DIFF_SCOPE_GATE",
+              "UNAPPROVED_PUBLIC_CONTRACT_CHANGE_GATE",
+              "UNSUPPORTED_GENERIC_CLAIM_GATE",
+              "EVIDENCE_REFERENCE_GATE"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PASS",
+              "FAIL"
+            ]
+          },
+          "failure_codes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "failure_reasons": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "evidence_references": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "final_validation_status": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "FAIL"
+      ]
+    }
+  }
+}

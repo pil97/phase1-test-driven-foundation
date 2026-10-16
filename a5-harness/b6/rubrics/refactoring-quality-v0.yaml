@@ -1,0 +1,47 @@
+schema_version: "0.1"
+rubric_id: "refactoring-quality-v0"
+
+axes:
+  DIAGNOSIS_ACCURACY:
+    weight: 1
+    score_min: 1
+    score_max: 5
+    anchors:
+      1: "The diagnosis conflicts with supplied code evidence, invents unsupported problems, or materially misidentifies the responsibility or dependency issue."
+      3: "The diagnosis identifies a real design or responsibility problem supported by the supplied evidence, but some reasoning is incomplete, broad, or only partially tied to concrete code."
+      5: "The diagnosis precisely identifies concrete design and responsibility problems, explains why they are present, and ties them directly to supplied code evidence without inventing unsupported issues."
+    intermediate_scores: "Scores 2 and 4 represent intermediate quality between the adjacent defined anchors."
+
+  CHANGE_MINIMALITY:
+    weight: 1
+    score_min: 1
+    score_max: 5
+    anchors:
+      1: "The proposal expands scope substantially beyond the diagnosed problem, introduces speculative abstractions or layers, or contains changes with no concrete evidence-based justification."
+      3: "The proposal is mostly scoped to the diagnosed problem, but includes some questionable expansion, weakly justified changes, or avoidable additional surface."
+      5: "The proposal makes the smallest sufficient change justified by the diagnosed problem, ties each change to evidence, and avoids speculative abstractions, layers, extension points, or unrelated cleanup."
+    intermediate_scores: "Scores 2 and 4 represent intermediate quality between the adjacent defined anchors."
+
+  BEHAVIOR_PRESERVATION_RISK:
+    weight: 1
+    score_min: 1
+    score_max: 5
+    anchors:
+      1: "The proposal fails to control major preservation risks, overlooks observed ordering, state mutation, payment failure, exception behavior, or otherwise threatens frozen characterization behavior."
+      3: "The proposal addresses the major frozen behaviors but leaves some preservation risks, ordering details, mutation concerns, or verification reasoning incomplete."
+      5: "The proposal explicitly controls preservation risk across the supplied frozen behaviors, including validation ordering, payment failure, state mutation, persistence, and exception outcomes, with concrete verification."
+    intermediate_scores: "Scores 2 and 4 represent intermediate quality between the adjacent defined anchors."
+
+  TESTABILITY_IMPROVEMENT:
+    weight: 1
+    score_min: 1
+    score_max: 5
+    anchors:
+      1: "The proposal provides no concrete testability improvement, or merely claims that the design will be easier to test without identifying a real seam, responsibility isolation, or observable verification benefit."
+      3: "The proposal provides a plausible testability improvement with some concrete responsibility isolation, seam, or verification benefit, but the connection is incomplete or modest."
+      5: "The proposal provides a clear evidence-based testability improvement through concrete responsibility isolation, an appropriate seam, or improved observable verification without speculative architecture."
+    intermediate_scores: "Scores 2 and 4 represent intermediate quality between the adjacent defined anchors."
+
+decision:
+  min_total: 16
+  min_axis: 3

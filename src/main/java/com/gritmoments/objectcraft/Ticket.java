@@ -1,0 +1,34 @@
+package com.gritmoments.objectcraft;
+
+public class Ticket {
+
+    private boolean reserved;
+    private Long userId;
+    private int price;
+
+    public Ticket(boolean reserved, Long userId, int price) {
+        this.reserved = reserved;
+        this.userId = userId;
+        this.price = price;
+    }
+
+    public boolean isReserved() {
+        return reserved;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void validateReservable() {
+        if (reserved) {
+            throw new TicketAlreadyReservedException();
+        }
+    }
+
+    public void reserveFor(long userId) {
+        this.reserved = true;
+        this.userId = userId;
+    }
+
+}
