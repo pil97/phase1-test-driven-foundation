@@ -63,8 +63,24 @@ def _require_text(value: Any, name: str) -> str:
     return value.strip()
 
 
-def load_rubric(path: Path | None = None) -> Rubric:
+def load_rubric(
+    path: Path | None = None,
+    expected_axes: tuple[str, ...] | None = None,
+) -> Rubric:
     source = (path or DEFAULT_RUBRIC_PATH).resolve()
+    axis_names = EXPECTED_AXES if expected_axes is None else expected_axes
+
+    if (
+        not axis_names
+        or any(
+            not isinstance(name, str) or not name.strip()
+            for name in axis_names
+        )
+        or len(set(axis_names)) != len(axis_names)
+    ):
+        raise ValueError(
+            "expected_axes must contain unique non-empty axis names"
+        )
 
     raw = yaml.safe_load(source.read_text(encoding="utf-8"))
     if not isinstance(raw, dict):
@@ -83,15 +99,15 @@ def load_rubric(path: Path | None = None) -> Rubric:
     if not isinstance(raw_axes, dict):
         raise ValueError("axes must be a mapping")
 
-    if tuple(raw_axes.keys()) != EXPECTED_AXES:
+    if tuple(raw_axes.keys()) != axis_names:
         raise ValueError(
             "axes must be exactly and in order: "
-            + ", ".join(EXPECTED_AXES)
+            + ", ".join(axis_names)
         )
 
     axes: dict[str, AxisRubric] = {}
 
-    for name in EXPECTED_AXES:
+    for name in axis_names:
         raw_axis = raw_axes[name]
         if not isinstance(raw_axis, dict):
             raise ValueError(f"axes.{name} must be a mapping")

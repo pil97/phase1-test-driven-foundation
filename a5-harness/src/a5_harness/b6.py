@@ -96,3 +96,65 @@ def project_critique_input(
         "forbidden_scope": deepcopy(fixture["forbidden_scope"]),
         "preserved_behavior": deepcopy(fixture["preserved_behaviors"]),
     }
+
+EVAL_NUMERIC_CRITERIA = (
+    "DIAGNOSIS_ACCURACY",
+    "CHANGE_MINIMALITY",
+    "BEHAVIOR_PRESERVATION_RISK",
+    "TESTABILITY_IMPROVEMENT",
+)
+
+
+EVAL_INPUT_FIELDS = (
+    "requirement",
+    "actual_code_evidence",
+    "gen_proposal",
+    "preserved_behavior",
+    "allowed_scope",
+    "forbidden_scope",
+    "evaluation_rubric",
+)
+
+
+def project_eval_input(
+    fixture: dict[str, Any],
+    gen_proposal: dict[str, Any],
+    evaluation_rubric: str,
+) -> dict[str, Any]:
+    """Return only the canonical B-6 fields that Eval is allowed to observe."""
+
+    source_fields = {
+        "requirement": "requirement",
+        "actual_code_evidence": "code_evidence",
+        "preserved_behavior": "preserved_behaviors",
+        "allowed_scope": "allowed_scope",
+        "forbidden_scope": "forbidden_scope",
+    }
+
+    missing = [
+        source
+        for source in source_fields.values()
+        if source not in fixture
+    ]
+    if missing:
+        raise ValueError(
+            "fixture missing eval projection field(s): "
+            + ", ".join(sorted(missing))
+        )
+
+    if not isinstance(gen_proposal, dict):
+        raise ValueError("gen_proposal must be a mapping")
+
+    if not isinstance(evaluation_rubric, str) or not evaluation_rubric.strip():
+        raise ValueError("evaluation_rubric must be a non-empty string")
+
+    return {
+        "requirement": deepcopy(fixture["requirement"]),
+        "actual_code_evidence": deepcopy(fixture["code_evidence"]),
+        "gen_proposal": deepcopy(gen_proposal),
+        "preserved_behavior": deepcopy(fixture["preserved_behaviors"]),
+        "allowed_scope": deepcopy(fixture["allowed_scope"]),
+        "forbidden_scope": deepcopy(fixture["forbidden_scope"]),
+        "evaluation_rubric": evaluation_rubric.strip(),
+    }
+
