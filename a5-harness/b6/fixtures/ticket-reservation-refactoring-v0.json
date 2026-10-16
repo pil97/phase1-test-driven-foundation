@@ -1,0 +1,192 @@
+{
+  "schema_version": "0.1",
+  "fixture_id": "ticket-reservation-refactoring-v0",
+  "baseline": {
+    "commit": "8cfcd6c1a6de43b6f2ce7a2acc031fee5ebed4f1",
+    "production_state": "PRE_MANUAL_REFACTORING_ORIGINAL_IMPLEMENTATION",
+    "characterization_test_exists": true
+  },
+  "requirement": {
+    "text": "Analyze the supplied pre-refactoring Ticket reservation code. Identify concrete design and responsibility problems supported by the code, including whether responsibility concentration, object-oriented design issues, SOLID concerns, or anemic-domain signals are actually present. Then propose the smallest justified refactoring that improves the design while preserving the observed behavior captured by the characterization tests. Do not introduce abstractions, layers, extension points, or architectural changes unless they are required by evidence in the supplied code. Explain each proposed change in terms of the observed problem it addresses."
+  },
+  "target_scope": {
+    "purpose": "PRIMARY_CODE_SURFACE_TO_DIAGNOSE",
+    "files": [
+      "src/main/java/com/gritmoments/objectcraft/TicketService.java",
+      "src/main/java/com/gritmoments/objectcraft/Ticket.java"
+    ],
+    "symbols": [
+      "TicketService",
+      "TicketService.reserveTicket(long,long,String)",
+      "Ticket",
+      "Ticket.reserved",
+      "Ticket.userId",
+      "Ticket.price",
+      "Ticket.isReserved()",
+      "Ticket.getPrice()",
+      "Ticket.setReserved(boolean)",
+      "Ticket.setUserId(Long)"
+    ]
+  },
+  "context_scope": {
+    "files": [
+      "src/main/java/com/gritmoments/objectcraft/TicketRepository.java",
+      "src/main/java/com/gritmoments/objectcraft/UserRepository.java",
+      "src/main/java/com/gritmoments/objectcraft/PaymentApi.java",
+      "src/main/java/com/gritmoments/objectcraft/User.java",
+      "src/main/java/com/gritmoments/objectcraft/UserNotFoundException.java",
+      "src/main/java/com/gritmoments/objectcraft/TicketAlreadyReservedException.java",
+      "src/main/java/com/gritmoments/objectcraft/PaymentFailedException.java",
+      "src/test/java/com/gritmoments/objectcraft/TicketServiceCharacterizationTest.java"
+    ],
+    "mutation_default": "READ_ONLY",
+    "package_wide_mutation_allowed": false,
+    "target_expansion": {
+      "allowed": true,
+      "condition": "ONLY_IF_STRICTLY_REQUIRED_AND_JUSTIFIED_BY_OBSERVED_CODE"
+    }
+  },
+  "code_evidence": [
+    {
+      "file": "src/main/java/com/gritmoments/objectcraft/TicketService.java",
+      "symbol": "TicketService.reserveTicket(long,long,String)",
+      "observed_responsibility": "The method performs user lookup and validation, ticket lookup, reservation-state checking, payment charging and failure handling, direct Ticket state mutation, and ticket persistence.",
+      "dependency_relation": "Uses UserRepository, TicketRepository, PaymentApi, User, Ticket, and reservation/payment exceptions.",
+      "evidence_reference": "baseline:8cfcd6c1a6de43b6f2ce7a2acc031fee5ebed4f1:TicketService.reserveTicket"
+    },
+    {
+      "file": "src/main/java/com/gritmoments/objectcraft/Ticket.java",
+      "symbol": "Ticket",
+      "observed_responsibility": "The baseline object exposes reserved, userId, and price state through isReserved(), getPrice(), setReserved(boolean), and setUserId(Long).",
+      "dependency_relation": "TicketService reads Ticket reservation/price state and directly mutates reservation/user ownership state.",
+      "evidence_reference": "baseline:8cfcd6c1a6de43b6f2ce7a2acc031fee5ebed4f1:Ticket"
+    }
+  ],
+  "preserved_behaviors": [
+    {
+      "id": "B1_VALID_RESERVATION",
+      "preconditions": [
+        "user exists",
+        "ticket exists and is not reserved",
+        "payment succeeds"
+      ],
+      "action": "TicketService.reserveTicket(userId, ticketId, paymentInfo)",
+      "expected_outcomes": [
+        "reserveTicket returns true",
+        "paymentApi.charge(paymentInfo, price) is invoked",
+        "ticket becomes reserved",
+        "ticket.userId becomes the requesting userId",
+        "ticketRepo.save(ticket) is invoked"
+      ],
+      "evidence": [
+        "src/test/java/com/gritmoments/objectcraft/TicketServiceCharacterizationTest.java"
+      ]
+    },
+    {
+      "id": "B2_MISSING_USER",
+      "preconditions": [
+        "requested user does not exist"
+      ],
+      "action": "TicketService.reserveTicket(userId, ticketId, paymentInfo)",
+      "expected_outcomes": [
+        "UserNotFoundException is thrown",
+        "payment interaction does not occur",
+        "ticket save does not occur"
+      ],
+      "evidence": [
+        "src/test/java/com/gritmoments/objectcraft/TicketServiceCharacterizationTest.java"
+      ]
+    },
+    {
+      "id": "B3_ALREADY_RESERVED",
+      "preconditions": [
+        "user exists",
+        "ticket is already reserved"
+      ],
+      "action": "TicketService.reserveTicket(userId, ticketId, paymentInfo)",
+      "expected_outcomes": [
+        "TicketAlreadyReservedException is thrown",
+        "payment interaction does not occur",
+        "ticket save does not occur"
+      ],
+      "evidence": [
+        "src/test/java/com/gritmoments/objectcraft/TicketServiceCharacterizationTest.java"
+      ]
+    },
+    {
+      "id": "B4_PAYMENT_FAILURE",
+      "preconditions": [
+        "user exists",
+        "ticket exists and is not reserved",
+        "payment fails"
+      ],
+      "action": "TicketService.reserveTicket(userId, ticketId, paymentInfo)",
+      "expected_outcomes": [
+        "PaymentFailedException is thrown",
+        "payment charge is attempted",
+        "ticket remains unreserved",
+        "ticket.userId remains null",
+        "ticket save does not occur"
+      ],
+      "evidence": [
+        "src/test/java/com/gritmoments/objectcraft/TicketServiceCharacterizationTest.java"
+      ]
+    }
+  ],
+  "allowed_scope": [
+    "TicketService.java",
+    "Ticket.java",
+    "existing behavior preservation",
+    "minimum refactoring justified by observed code",
+    "existing repository/payment/exception contracts as context",
+    "characterization-test-compatible production changes",
+    "target expansion only when strictly necessary and explicitly justified"
+  ],
+  "forbidden_scope": [
+    "Point Payment feature",
+    "PointPayment.java",
+    "PointBalanceRepository.java",
+    "PointPaymentTest.java",
+    "speculative PaymentPort",
+    "speculative PaymentSelector",
+    "new architecture layers",
+    "new framework/agent infrastructure",
+    "unrelated package changes",
+    "build dependency changes",
+    "Gradle/build changes",
+    "CI/CD changes",
+    "arbitrary public contract changes",
+    "abstractions for unverified future requirements",
+    "modifying characterization behavior merely to make refactoring pass",
+    "broad package-wide cleanup unrelated to diagnosed problems"
+  ],
+  "test_evidence": {
+    "canonical_test": "src/test/java/com/gritmoments/objectcraft/TicketServiceCharacterizationTest.java",
+    "baseline_test_blob": "c9a5e574b25070a26205df241bf20586f1b12996",
+    "manual_end_test_blob": "c9a5e574b25070a26205df241bf20586f1b12996",
+    "current_test_blob": "c9a5e574b25070a26205df241bf20586f1b12996",
+    "test_count": 4,
+    "baseline_to_manual_end": "UNCHANGED",
+    "manual_end_to_current": "UNCHANGED"
+  },
+  "manual_reference": {
+    "start_commit": "8cfcd6c1a6de43b6f2ce7a2acc031fee5ebed4f1",
+    "end_commit": "81140a1f681405ffbdedf946dd584b5b734e8e2d",
+    "commit_count": 4,
+    "unrelated_change_count": 0,
+    "expose_to_generator": false,
+    "usage": "POST_RUN_COMPARISON_REFERENCE",
+    "results": [
+      "TicketService changed from ticket.isReserved() to ticket.validateReservable().",
+      "TicketService changed from ticket.setReserved(true) plus ticket.setUserId(userId) to ticket.reserveFor(userId).",
+      "Ticket changed from public reservation-state setters toward reservation-specific behavior."
+    ]
+  },
+  "evaluation_criteria": {
+    "DIAGNOSIS_ACCURACY": "NUMERIC_AXIS",
+    "CHANGE_MINIMALITY": "NUMERIC_AXIS",
+    "BEHAVIOR_PRESERVATION_RISK": "NUMERIC_AXIS",
+    "TESTABILITY_IMPROVEMENT": "NUMERIC_AXIS",
+    "EVIDENCE_SUFFICIENCY": "HARD_GATE"
+  }
+}
